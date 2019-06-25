@@ -35,7 +35,7 @@ export default {
 	watch:{
 		searchText(value){
 			
-			this.axios.get('/api/searchList?cityId=10&kw='+value).then((res)=>{
+			this.axios.get('/api/searchList?cityId='+this.$store.state.city.id+'&kw='+value).then((res)=>{
 				if(res.data.msg=='ok' &&res.data.data.movies){
 						this.movieList=res.data.data.movies.list;
 						console.log(this.movieList);
@@ -49,7 +49,10 @@ export default {
             console.log(url);
             return url.replace('/w.h/',wh)
         }
-    }
+	},
+	mounted(){
+		console.log(this.$store)
+	}
 }
 </script>
 

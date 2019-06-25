@@ -1,5 +1,7 @@
 <template>
-<div class="movie_body">
+	<div class="movie_body">
+		<loading v-if="loading"/>
+		<myScroll v-else :isShow=isShow :handlePullDown=this.getComingList>
 				<ul>
 					<li v-for="item in comingList" :key="item.id">
 						<div class="pic_show"><img :src="item.img |setWH('/160.180/')"></div>
@@ -14,32 +16,44 @@
 						</div>
 					</li>
 				</ul>
-			</div>
+		</myScroll>
+	</div>
 </template>
 
 <script>
+import scroll from 'better-scroll'
+
 export default {
    name:'playsoon',
     data(){
         return {
-            comingList:[],
+			comingList:[],
+			isShow:false,
+			loading:true
         }
     },
-    mounted(){
-        this.axios.get('/api/movieComingList?cityId=10').then((res)=>{
-            if(res.data.msg=='ok'){
-                 this.comingList =res.data.data.comingList;
-				
-            }
-           
-        })
+    activated(){
+      this.getComingList();
     },
     filters:{
         setWH(url,wh){
-            console.log(url);
             return url.replace('/w.h/',wh)
         }
-    }
+	},
+	methods:{
+		getComingList(){
+			  this.isShow=true;
+			  console.log('/api/movieComingList?cityId='+this.$store.state.city.id);
+			  this.axios.get('/api/movieComingList?cityId='+this.$store.state.city.id).then((res)=>{
+				if(res.data.msg=='ok'){
+					this.comingList =res.data.data.comingList;
+					 this.isShow=false;	
+					 this.loading=false;	
+				}
+       		 })
+		}
+	}
+	
 }
 </script>
 

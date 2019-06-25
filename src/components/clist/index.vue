@@ -1,6 +1,7 @@
 <template>
 <div class="cinema_body">
-    <ul>
+    <loading v-if="loading"/>
+    <ul v-else>
         <li v-for="item in Clist" :key="item.id">
             <div>
                 <span>{{item.nm}}</span>
@@ -24,12 +25,14 @@ export default {
     name:'Clist',
     data(){
         return {
-            Clist:[]
+            Clist:[],
+            loading:true
         }
     },
-    mounted(){
-        this.axios.get('/api/cinemaList?cityId=10').then((res)=>{
+    activated(){
+        this.axios.get('/api/cinemaList?cityId='+this.$store.state.city.id).then((res)=>{
             this.Clist=res.data.data.cinemas;
+            this.loading=false
         })
     },
     filters:{

@@ -4,7 +4,7 @@
         <div id="content">
             <div class="movie_menu">
 				<router-link tag='div' class="city_name" to="/movie/city">
-					<span>大连</span><i class="iconfont icon-lower-triangle"></i>
+					<span>{{$store.state.city.nm}}</span><i class="iconfont icon-lower-triangle"></i>
 				</router-link>
 				<div class="hot_swtich">
 					<router-link tag="div" class="hot_item " to='/movie/nowplaying'>正在热映</router-link>
@@ -17,8 +17,9 @@
            <keep-alive>
                 <router-view/>
             </keep-alive>
+           
         </div>
-         
+          <router-view name='detail'/>
         <Tarbar/>
     </div>
 </template>

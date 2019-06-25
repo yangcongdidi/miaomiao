@@ -1,29 +1,36 @@
 <template>
 			<div class="city_body">
-				<div class="city_list">
-					<div class="city_hot">
-						<h2>热门城市</h2>
-						<ul class="clearfix">
-							<li v-for="item in hotList" :key="item.index">{{item.nm}}</li>
-					
-						</ul>
-					</div>
-					<div class="city_sort" ref='citySoft'>
-						<div v-for="item in cityList" :key='item.index'>
-							<h2>{{item.index}}</h2>
-							<ul>
-								<li v-for="cityItem in item.List" :key="cityItem.id">{{cityItem.nm}}</li>
+				<loading v-if="loading"/>
+				<div v-else class="city_list">
+					<myScroll  ref='myScroll'>
+						<div>
+							<div class="city_hot">
+								<h2>热门城市</h2>
+								<ul class="clearfix">
+									<li v-for="item in hotList" :key="item.index" @tap='selectCity(item.nm,item.id)'>{{item.nm}}</li>
 							
-							</ul>
-						</div>	
-					</div>
+								</ul>
+							</div>
+							<div class="city_sort" ref='citySoft'>
+								<div v-for="item in cityList" :key='item.index'>
+									<h2>{{item.index}}</h2>
+									<ul>
+										<li v-for="cityItem in item.List" :key="cityItem.id" @tap='selectCity(cityItem.nm,cityItem.id)' >{{cityItem.nm}}</li>
+									
+									</ul>
+								</div>	
+							</div>
+						</div>
+					</myScroll>
 				</div>
+
 				<div class="city_index">
 					<ul>
 						<li v-for="(item,index) in cityList" :key='item.index' @touchstart='handleLetterList(index)'>{{item.index}}</li>
 					</ul>
 				</div>
 			</div>
+
 </template>
 
 <script>
@@ -32,27 +39,42 @@ export default {
 	data(){
 		return {
 			cityList:[],
-			hotList:[]
+			hotList:[],
+			loading:true
 		}
 	},
 	mounted(){
-		this.axios.get('/api/cityList').then((res)=>{
-			let cityes=res.data.data.cities;
-		
-			if(res.data.msg='ok'){
-				let {cityList,hotList}=this.formatCityes(cityes);
-				this.cityList=cityList;
-				this.hotList=hotList;
-				console.log(this.cityList)
-			}
 
-		})
+		let cityList=window.localStorage.getItem('cityList');
+		let hotList=window.localStorage.getItem('hotList');
+		
+		if(cityList && hotList){
+			this.cityList=JSON.parse(cityList);
+			this.hotList=JSON.parse(hotList);
+			this.loading=false
+		}else{
+				this.axios.get('/api/cityList').then((res)=>{
+				let cityes=res.data.data.cities;
+			
+				if(res.data.msg='ok'){
+					let {cityList,hotList}=this.formatCityes(cityes);
+					this.cityList=cityList;
+					this.hotList=hotList;
+					window.localStorage.setItem('cityList',JSON.stringify(cityList));
+					window.localStorage.setItem('hotList',JSON.stringify(hotList));
+					this.loading=false
+				}
+
+				})
+		}
+
+		
 	},
 	methods:{
 		formatCityes(cityes){
 			let cityList=[];
 			let hotList=[];
-				//[{index:'A',List:[{py:'阿成'},{}]}]
+		
 				
 				for(let i=0;i<cityes.length;i++){
 					let firstLetter=cityes[i].py.substr(0,1).toUpperCase();
@@ -102,10 +124,21 @@ export default {
 					hotList
 				}
 		},
+
+		selectCity(nm,id){
+			this.$store.commit('city/CITY_INFO',{nm,id});
+			this.$router.push('/movie')
+			window.localStorage.setItem('cityNm',nm);
+			window.localStorage.setItem('cityId',id);
+
+		},
+
+
 		handleLetterList(index){
 			let dom=this.$refs.citySoft.getElementsByTagName('h2');
-			console.log(dom[index].offsetTop);
-			this.$refs.citySoft.parentNode.scrollTop=dom[index].offsetTop;
+			this.$refs.myScroll.toScrollTop(dom[index].offsetTop);
+			
+	
 		}
 	}
 }
